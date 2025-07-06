@@ -158,6 +158,17 @@ public class BibleSearchDialog extends Stage implements BibleChangeListener {
         });
     }
 
+    /**
+     * Set the search text and trigger a search.
+     * @param searchText the text to search for
+     */
+    public void setSearchText(String searchText) {
+        if (searchText != null && !searchText.trim().isEmpty()) {
+            searchField.setText(searchText);
+            // The text change listener will automatically trigger the update
+        }
+    }
+
     private ExecutorService updateExecutor = Executors.newSingleThreadExecutor();
     private ExecRunnable lastUpdateRunnable = null;
 

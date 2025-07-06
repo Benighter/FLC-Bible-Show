@@ -35,6 +35,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import org.quelea.data.bible.Bible;
 import org.quelea.data.bible.BibleBook;
+import org.quelea.data.bible.BibleChapter;
 import org.quelea.data.bible.BibleChangeListener;
 import org.quelea.data.bible.BibleManager;
 import org.quelea.data.bible.BibleVerse;
@@ -73,6 +74,36 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
     private ObservableList<BibleBook> master;
     private WebEngine webEngine;
     private ChapterVerseParser cvp;
+
+    // Static fields to track the currently highlighted verse for live display
+    private static volatile int currentHighlightedVerse = -1;
+    private static volatile String currentHighlightedPassage = "";
+
+    /**
+     * Get the currently highlighted verse number for live display highlighting.
+     * @return the verse number, or -1 if no verse is highlighted
+     */
+    public static int getCurrentHighlightedVerse() {
+        return currentHighlightedVerse;
+    }
+
+    /**
+     * Get the currently highlighted passage reference for live display highlighting.
+     * @return the passage reference (e.g., "Genesis 1:2"), or empty string if none
+     */
+    public static String getCurrentHighlightedPassage() {
+        return currentHighlightedPassage;
+    }
+
+    /**
+     * Set the currently highlighted verse for live display highlighting.
+     * @param verseNum the verse number to highlight
+     * @param passageRef the passage reference (e.g., "Genesis 1:2")
+     */
+    public static void setCurrentHighlightedVerse(int verseNum, String passageRef) {
+        currentHighlightedVerse = verseNum;
+        currentHighlightedPassage = passageRef;
+    }
 
     /**
      * Create and populate a new library bible panel.
@@ -338,10 +369,10 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                         if ((verse.getNum() >= cvp.getFromVerse() && verse.getNum() <= toVerse) || cvp.getFromVerse() == 0) {
                             verses.add(verse);
                             previewText.append("<mark>");
-                            previewText.append("<span onclick=\"java.send('").append(verse.getNum()).append("')\" id=\"").append(id).append("\"><sup>").append(verse.getNum()).append("</sup>").append(' ').append(verse.getText()).append(' ').append("</span>");
+                            previewText.append("<div class=\"verse-container\" style=\"margin-bottom: 12px; padding: 8px; border-bottom: 1px solid #e0e0e0; line-height: 1.5;\"><span onclick=\"java.send('").append(verse.getNum()).append("')\" id=\"").append(id).append("\" class=\"verse-clickable\" style=\"cursor: pointer; display: block; padding: 4px; border-radius: 4px; transition: background-color 0.2s;\"><sup style=\"font-weight: bold; color: #0066cc; margin-right: 4px;\">").append(verse.getNum()).append("</sup>").append(verse.getText()).append("</span></div>");
                             previewText.append("</mark>");
                         } else {
-                            previewText.append("<span onclick=\"java.send('").append(verse.getNum()).append("')\" id=\"").append(id).append("\"><sup>").append(verse.getNum()).append("</sup>").append(' ').append(verse.getText()).append(' ').append("</span>");
+                            previewText.append("<div class=\"verse-container\" style=\"margin-bottom: 12px; padding: 8px; border-bottom: 1px solid #e0e0e0; line-height: 1.5;\"><span onclick=\"java.send('").append(verse.getNum()).append("')\" id=\"").append(id).append("\" class=\"verse-clickable\" style=\"cursor: pointer; display: block; padding: 4px; border-radius: 4px; transition: background-color 0.2s;\"><sup style=\"font-weight: bold; color: #0066cc; margin-right: 4px;\">").append(verse.getNum()).append("</sup>").append(verse.getText()).append("</span></div>");
                         }
                     } else {
                         previewText.append("<body>");
@@ -407,6 +438,18 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                 "               background-color: white;\n" +
                 "               color: #000;\n" +
                 "           }\n"
+                + "         .verse-container {\n"
+                + "             border-bottom: 1px solid #e0e0e0;\n"
+                + "         }\n"
+                + "         .verse-clickable:hover {\n"
+                + "             background-color: #f0f8ff;\n"
+                + "         }\n"
+                + "         .verse-active {\n"
+                + "             background-color: #e6f3ff !important;\n"
+                + "             border-left: 4px solid #0066cc !important;\n"
+                + "             padding-left: 8px !important;\n"
+                + "             box-shadow: 0 2px 4px rgba(0,102,204,0.1);\n"
+                + "         }\n"
                 + "     </style>\n"
                 + "     <script>\n"
                 + "     function scrollTo(eleID) {\n"
@@ -419,6 +462,19 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                 + "         var el = document.getElementById(elementID);\n"
                 + "         if (!!el && el.scrollIntoView) {\n"
                 + "			el.scrollIntoView(false);\n"
+                + "         }\n"
+                + "     }\n"
+                + "     function highlightActiveVerse(verseNum) {\n"
+                + "         // Remove previous highlighting\n"
+                + "         var activeVerses = document.querySelectorAll('.verse-active');\n"
+                + "         for (var i = 0; i < activeVerses.length; i++) {\n"
+                + "             activeVerses[i].classList.remove('verse-active');\n"
+                + "         }\n"
+                + "         // Add highlighting to current verse\n"
+                + "         var currentVerse = document.querySelector('[onclick*=\"' + verseNum + '\"]');\n"
+                + "         if (currentVerse) {\n"
+                + "             currentVerse.classList.add('verse-active');\n"
+                + "             currentVerse.scrollIntoView({ behavior: 'smooth', block: 'center' });\n"
                 + "         }\n"
                 + "     }\n"
                 + "     </script>\n"
@@ -444,20 +500,65 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                 final String chapter = chapterNum;
                 final int fromVerse = cvp.getFromVerse();
                 Platform.runLater(() -> {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append(chapter).append(":");
-                    if (fromVerse == 0) {
-                        sb.append(verseNum);
-                    } else if (verseNum > cvp.getToVerse()) {
-                        sb.append(fromVerse).append("-").append(verseNum);
-                    } else {
-                        sb.append(verseNum).append("-").append(cvp.getToVerse());
+                    try {
+                        Bible currentBible = bibleSelector.getSelectionModel().getSelectedItem();
+                        BibleBook currentBook = bookSelector.getSelectionModel().getSelectedItem();
+
+                        if (currentBible != null && currentBook != null) {
+                            int chapterIndex = Integer.parseInt(chapter) - 1;
+                            if (chapterIndex >= 0 && chapterIndex < currentBook.getChapters().length) {
+                                BibleChapter bibleChapter = currentBook.getChapters()[chapterIndex];
+                                if (bibleChapter != null && verseNum > 0 && verseNum <= bibleChapter.getVerses().length) {
+                                    BibleVerse bibleVerse = bibleChapter.getVerses()[verseNum - 1];
+                                    if (bibleVerse != null) {
+                                        // Create a single verse passage with highlighting
+                                        BibleVerse[] singleVerse = {bibleVerse};
+                                        String passageTitle = currentBook.getBookName() + " " + chapter + ":" + verseNum;
+                                        BiblePassage passage = new BiblePassage(currentBible.getBibleName(), passageTitle, singleVerse, false, verseNum);
+
+                                        // Check if we're already live with a Bible passage
+                                        var livePanel = QueleaApp.get().getMainWindow().getMainPanel().getLivePanel();
+                                        var currentDisplayable = livePanel.getDisplayable();
+
+                                        if (currentDisplayable instanceof BiblePassage && livePanel.isContentShowing()) {
+                                            // Already live with a Bible passage - just display this verse without adding to service
+                                            livePanel.setDisplayable(passage, 0);
+                                        } else {
+                                            // Not live or not a Bible passage - add to schedule and go live
+                                            QueleaApp.get().getMainWindow().getMainPanel().getSchedulePanel().getScheduleList().add(passage);
+                                            QueleaApp.get().getMainWindow().getMainPanel().getSchedulePanel().getScheduleList().getSelectionModel().select(passage);
+                                            QueleaApp.get().getMainWindow().getMainPanel().getPreviewPanel().goLive();
+                                        }
+
+                                        // Highlight the active verse in the Bible panel
+                                        Platform.runLater(() -> {
+                                            try {
+                                                webEngine.executeScript("highlightActiveVerse('" + verseNum + "');");
+                                            } catch (Exception ex) {
+                                                // Ignore if highlighting fails
+                                            }
+                                        });
+
+                                        // Update the highlighted verse information for live display
+                                        setCurrentHighlightedVerse(verseNum, passageTitle);
+                                    }
+                                }
+                            }
+                        }
+                    } catch (Exception e) {
+                        // If there's an error creating the passage, fall back to the original behavior
+                        StringBuilder sb = new StringBuilder();
+                        if (fromVerse == 0) {
+                            sb.append(chapter).append(":").append(verseNum);
+                        } else if (verseNum > cvp.getToVerse()) {
+                            sb.append(chapter).append(":").append(fromVerse).append("-").append(verseNum);
+                        } else {
+                            sb.append(chapter).append(":").append(verseNum).append("-").append(cvp.getToVerse());
+                        }
+                        passageSelector.setText(sb.toString());
                     }
-                    passageSelector.setText(sb.toString());
                 });
-
             }
-
         }
     }
 
@@ -533,4 +634,5 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
     public TextField getPassageSelector() {
         return passageSelector;
     }
+
 }

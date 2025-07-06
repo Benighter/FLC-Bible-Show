@@ -51,6 +51,15 @@ import org.quelea.windows.main.actionhandlers.PrintScheduleActionHandler;
 import org.quelea.windows.main.actionhandlers.QuickInsertActionHandler;
 import org.quelea.windows.main.actionhandlers.SaveScheduleActionHandler;
 import org.quelea.windows.main.actionhandlers.ShowNoticesActionHandler;
+import org.quelea.data.bible.QuickBibleSearchParser;
+import org.quelea.data.bible.BibleManager;
+import org.quelea.data.bible.Bible;
+import org.quelea.data.bible.BibleBook;
+import org.quelea.data.bible.BibleChapter;
+import org.quelea.data.bible.BibleVerse;
+import org.quelea.data.displayable.BiblePassage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.control.Tooltip;
 
 /**
  * Quelea's main toolbar.
@@ -78,6 +87,11 @@ public class MainToolbar extends ToolBar {
     private boolean recording;
     private long openTime;
     private long recTime;
+
+    // Quick Bible Search components
+    private TextField quickBibleSearchField;
+    private Label quickBibleSearchLabel;
+    private ComboBox<Bible> quickBibleVersionSelector;
     private Timer recCount;
 
     /**
@@ -267,6 +281,68 @@ public class MainToolbar extends ToolBar {
         manageNoticesButton.setOnAction(new ShowNoticesActionHandler());
         getItems().add(manageNoticesButton);
 
+        // Add Quick Bible Search
+        getItems().add(new Separator());
+
+        quickBibleSearchLabel = new Label("Quick Bible:");
+        quickBibleSearchLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #666666;");
+        getItems().add(quickBibleSearchLabel);
+
+        // Bible version selector
+        quickBibleVersionSelector = new ComboBox<>();
+        quickBibleVersionSelector.setPrefWidth(120);
+        quickBibleVersionSelector.setMaxWidth(120);
+        quickBibleVersionSelector.setTooltip(new Tooltip("Select Bible version"));
+
+        // Populate with available Bibles
+        Bible[] availableBibles = BibleManager.get().getBibles();
+        for (Bible bible : availableBibles) {
+            quickBibleVersionSelector.getItems().add(bible);
+        }
+
+        // Set default selection
+        String defaultBibleName = QueleaProperties.get().getDefaultBible();
+        for (Bible bible : availableBibles) {
+            if (bible.getBibleName().equals(defaultBibleName)) {
+                quickBibleVersionSelector.getSelectionModel().select(bible);
+                break;
+            }
+        }
+        if (quickBibleVersionSelector.getSelectionModel().getSelectedItem() == null && availableBibles.length > 0) {
+            quickBibleVersionSelector.getSelectionModel().selectFirst();
+        }
+
+        // Sync with main Bible panel when changed
+        quickBibleVersionSelector.setOnAction(event -> {
+            Bible selectedBible = quickBibleVersionSelector.getSelectionModel().getSelectedItem();
+            if (selectedBible != null) {
+                QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getBiblePanel().getBibleSelector().getSelectionModel().select(selectedBible);
+            }
+        });
+
+        getItems().add(quickBibleVersionSelector);
+
+        quickBibleSearchField = new TextField();
+        quickBibleSearchField.setPromptText("e.g. Ge 1 2, Mt 5:3-7");
+        quickBibleSearchField.setPrefWidth(150);
+        quickBibleSearchField.setMaxWidth(150);
+        quickBibleSearchField.setTooltip(new Tooltip("Quick Bible search: Type abbreviations like 'Ge 1 2' for Genesis 1:2, then press Enter to add to service, Shift+Enter to go live"));
+
+        // Handle Enter key press for quick search
+        quickBibleSearchField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                if (event.isShiftDown()) {
+                    // Shift+Enter: Add to service and go live
+                    performQuickBibleSearch(true);
+                } else {
+                    // Enter: Add to service only
+                    performQuickBibleSearch(false);
+                }
+            }
+        });
+
+        getItems().add(quickBibleSearchField);
+
         // Auto-hide add menu
         quickInsertButton.setOnMouseEntered(evt -> {
             add.hide();
@@ -431,6 +507,199 @@ public class MainToolbar extends ToolBar {
         String time = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         Platform.runLater(() -> {
             tb.setText(time);
+        });
+    }
+
+    /**
+     * Perform quick Bible search based on the text in the quick search field.
+     * Supports formats like "Ge 1 2" (Genesis 1:2), "Mt 5:3-7" (Matthew 5:3-7), etc.
+     * @param goLive if true, add to service and go live; if false, just add to service
+     */
+    private void performQuickBibleSearch(boolean goLive) {
+        String searchText = quickBibleSearchField.getText().trim();
+        if (searchText.isEmpty()) {
+            return;
+        }
+
+        QuickBibleSearchParser parser = new QuickBibleSearchParser(searchText);
+
+        if (!parser.isValid()) {
+            // Show error feedback
+            quickBibleSearchField.setStyle("-fx-border-color: red; -fx-border-width: 1px;");
+            quickBibleSearchField.setTooltip(new Tooltip("Error: " + parser.getErrorMessage()));
+
+            // Clear error styling after 3 seconds
+            Platform.runLater(() -> {
+                Timer timer = new Timer(3000, e -> {
+                    quickBibleSearchField.setStyle("");
+                    quickBibleSearchField.setTooltip(new Tooltip("Quick Bible search: Type abbreviations like 'Ge 1 2' for Genesis 1:2, then press Enter to add to service, Shift+Enter to go live"));
+                });
+                timer.setRepeats(false);
+                timer.start();
+            });
+            return;
+        }
+
+        // Clear the search field and show success feedback
+        quickBibleSearchField.clear();
+        quickBibleSearchField.setStyle("-fx-border-color: green; -fx-border-width: 1px;");
+
+        // Clear success styling after 1 second
+        Platform.runLater(() -> {
+            Timer timer = new Timer(1000, e -> {
+                quickBibleSearchField.setStyle("");
+            });
+            timer.setRepeats(false);
+            timer.start();
+        });
+
+        // Create and add Bible passage directly to the service
+        Platform.runLater(() -> {
+            try {
+                createAndAddBiblePassage(parser, goLive);
+            } catch (Exception e) {
+                // If there's an error, show error feedback
+                quickBibleSearchField.setStyle("-fx-border-color: red; -fx-border-width: 1px;");
+                quickBibleSearchField.setTooltip(new Tooltip("Error creating Bible passage: " + e.getMessage()));
+
+                Platform.runLater(() -> {
+                    Timer timer = new Timer(3000, evt -> {
+                        quickBibleSearchField.setStyle("");
+                        quickBibleSearchField.setTooltip(new Tooltip("Quick Bible search: Type abbreviations like 'Ge 1 2' for Genesis 1:2, then press Enter to add to service, Shift+Enter to go live"));
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
+                });
+            }
+        });
+    }
+
+    /**
+     * Get the quick Bible search field for external access (e.g., for keyboard shortcuts).
+     * @return the quick Bible search text field
+     */
+    public TextField getQuickBibleSearchField() {
+        return quickBibleSearchField;
+    }
+
+    /**
+     * Create a Bible passage from the parsed search and add it to the service.
+     * @param parser the parsed Bible search
+     * @param goLive if true, also go live with the passage
+     */
+    private void createAndAddBiblePassage(QuickBibleSearchParser parser, boolean goLive) {
+        // Get the current Bible from the toolbar selector
+        Bible currentBible = quickBibleVersionSelector.getSelectionModel().getSelectedItem();
+        if (currentBible == null) {
+            throw new RuntimeException("No Bible version is selected");
+        }
+
+        // Get the book
+        BibleBook[] books = currentBible.getBooks();
+        if (parser.getBookIndex() >= books.length) {
+            throw new RuntimeException("Book index out of range: " + parser.getBookIndex());
+        }
+
+        BibleBook book = books[parser.getBookIndex()];
+        if (book == null) {
+            throw new RuntimeException("Book not found: " + parser.getFullBookName());
+        }
+
+        // Get the chapter
+        BibleChapter[] chapters = book.getChapters();
+        int chapterIndex = parser.getFromChapter() - 1; // Convert to 0-based
+        if (chapterIndex < 0 || chapterIndex >= chapters.length) {
+            throw new RuntimeException("Chapter not found: " + parser.getFromChapter() + " in " + parser.getFullBookName());
+        }
+
+        BibleChapter chapter = chapters[chapterIndex];
+        if (chapter == null) {
+            throw new RuntimeException("Chapter is null: " + parser.getFromChapter() + " in " + parser.getFullBookName());
+        }
+
+        // Get the verses
+        BibleVerse[] allVerses = chapter.getVerses();
+        int fromVerse = parser.getFromVerse() - 1; // Convert to 0-based
+        int toVerse = parser.getToVerse() - 1; // Convert to 0-based
+
+        // Handle whole chapter case
+        if (parser.isWholeChapter()) {
+            toVerse = allVerses.length - 1;
+        }
+
+        // Validate verse range
+        if (fromVerse < 0 || fromVerse >= allVerses.length) {
+            throw new RuntimeException("Verse not found: " + parser.getFromVerse() + " in " + parser.getFullBookName() + " " + parser.getFromChapter());
+        }
+        if (toVerse < 0 || toVerse >= allVerses.length) {
+            toVerse = allVerses.length - 1; // Clamp to last verse
+        }
+        if (toVerse < fromVerse) {
+            toVerse = fromVerse; // Ensure valid range
+        }
+
+        // Create array of verses for the passage
+        BibleVerse[] passageVerses = new BibleVerse[toVerse - fromVerse + 1];
+        System.arraycopy(allVerses, fromVerse, passageVerses, 0, passageVerses.length);
+
+        // Create the Bible passage
+        String passageTitle = parser.getFormattedReference();
+        BiblePassage passage = new BiblePassage(currentBible.getBibleName(), passageTitle, passageVerses, false);
+
+        // Add to schedule
+        QueleaApp.get().getMainWindow().getMainPanel().getSchedulePanel().getScheduleList().add(passage);
+
+        // Navigate to the passage in the Bible panel
+        navigateToBiblePassage(parser, currentBible);
+
+        // Go live if requested
+        if (goLive) {
+            QueleaApp.get().getMainWindow().getMainPanel().getSchedulePanel().getScheduleList().getSelectionModel().select(passage);
+            QueleaApp.get().getMainWindow().getMainPanel().getPreviewPanel().goLive();
+        }
+    }
+
+    /**
+     * Navigate to the specified Bible passage in the Bible panel.
+     * @param parser the parsed Bible search
+     * @param bible the Bible to use
+     */
+    private void navigateToBiblePassage(QuickBibleSearchParser parser, Bible bible) {
+        Platform.runLater(() -> {
+            try {
+                var biblePanel = QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getBiblePanel();
+
+                // Set the Bible selector
+                biblePanel.getBibleSelector().getSelectionModel().select(bible);
+
+                // Set the book selector
+                BibleBook[] books = bible.getBooks();
+                if (parser.getBookIndex() < books.length) {
+                    BibleBook book = books[parser.getBookIndex()];
+                    biblePanel.getBookSelector().getSelectionModel().select(book);
+
+                    // Set the passage selector to show individual verses
+                    String passageText;
+                    if (parser.isWholeChapter()) {
+                        // For whole chapter, just show the chapter number
+                        passageText = String.valueOf(parser.getFromChapter());
+                    } else if (parser.getFromVerse() == parser.getToVerse()) {
+                        // Single verse
+                        passageText = parser.getFromChapter() + ":" + parser.getFromVerse();
+                    } else {
+                        // Verse range - show the range to display all verses individually
+                        passageText = parser.getFromChapter() + ":" + parser.getFromVerse() + "-" + parser.getToVerse();
+                    }
+
+                    biblePanel.getPassageSelector().setText(passageText);
+
+                    // Switch to the Bible tab
+                    QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getTabPane().getSelectionModel().select(1); // Bible tab is index 1
+                }
+            } catch (Exception e) {
+                // If navigation fails, just continue - the passage was still added to the schedule
+                System.err.println("Failed to navigate to Bible passage: " + e.getMessage());
+            }
         });
     }
 }

@@ -35,7 +35,7 @@ repositories {
 }
 
 javafx {
-    version = "21"
+    version = "17"
     modules = [ 'javafx.base', 'javafx.controls', 'javafx.fxml', 'javafx.graphics', 'javafx.media', 'javafx.swing', 'javafx.web' ]
 }
 
@@ -66,8 +66,8 @@ task removeDist(type: Delete) {
 }
 
 compileJava   {
-    sourceCompatibility = '21'
-    targetCompatibility = '21'
+    sourceCompatibility = '17'
+    targetCompatibility = '17'
 }
 
 clean.finalizedBy(removeDist)
@@ -75,6 +75,10 @@ compileJava.finalizedBy(dependencyUpdates)
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 ext.mainClass = 'org.quelea.windows.main.MainStub'
+
+application {
+    mainClass = 'org.quelea.windows.main.MainStub'
+}
 
 task createQueleaExe64(type: edu.sc.seis.launch4j.tasks.Launch4jLibraryTask) { //Launch4j
     mainClassName = 'org.quelea.windows.main.MainStub'
@@ -88,28 +92,46 @@ task createQueleaExe64(type: edu.sc.seis.launch4j.tasks.Launch4jLibraryTask) { /
 }
 
 task downloadGStreamer {
-    def f = new File('gs.msi')
-    if (!f.exists()) {
-        new URL('https://gstreamer.freedesktop.org/data/pkg/windows/1.22.8/msvc/gstreamer-1.0-msvc-x86_64-1.22.8.msi').withInputStream{ i -> f.withOutputStream{ it << i }}
+    doLast {
+        def f = new File('gs.msi')
+        if (!f.exists()) {
+            try {
+                new URL('https://gstreamer.freedesktop.org/data/pkg/windows/1.22.8/msvc/gstreamer-1.0-msvc-x86_64-1.22.8.msi').withInputStream{ i -> f.withOutputStream{ it << i }}
+            } catch (Exception e) {
+                println "Warning: Could not download GStreamer: ${e.message}"
+            }
+        }
     }
 }
 
 task downloadJres {
-    def mf = new File('macjre.zip')
-    if (!mf.exists()) {
-        new URL('https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-fx-jre21.0.6-macosx_x64.zip').withInputStream{ i -> mf.withOutputStream{ it << i }}
-    }
-
-    def wf = new File('winjre64.zip')
-    if (!wf.exists()) {
-        new URL('https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-fx-jre21.0.6-win_x64.zip').withInputStream{ i -> wf.withOutputStream{ it << i }}
-    }
-
     doLast {
-        ant.move file: "macjre.zip",
-                todir: "bundlejre"
-        ant.move file: "winjre64.zip",
-                todir: "bundlejre"
+        def mf = new File('macjre.zip')
+        if (!mf.exists()) {
+            try {
+                new URL('https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-fx-jre21.0.6-macosx_x64.zip').withInputStream{ i -> mf.withOutputStream{ it << i }}
+            } catch (Exception e) {
+                println "Warning: Could not download Mac JRE: ${e.message}"
+            }
+        }
+
+        def wf = new File('winjre64.zip')
+        if (!wf.exists()) {
+            try {
+                new URL('https://cdn.azul.com/zulu/bin/zulu21.40.17-ca-fx-jre21.0.6-win_x64.zip').withInputStream{ i -> wf.withOutputStream{ it << i }}
+            } catch (Exception e) {
+                println "Warning: Could not download Windows JRE: ${e.message}"
+            }
+        }
+
+        if (new File('macjre.zip').exists()) {
+            ant.move file: "macjre.zip",
+                    todir: "bundlejre"
+        }
+        if (new File('winjre64.zip').exists()) {
+            ant.move file: "winjre64.zip",
+                    todir: "bundlejre"
+        }
     }
 }
 
@@ -248,7 +270,7 @@ dependencies {
     implementation group: 'org.openoffice', name: 'jurt', version: '4.1.2'
     implementation group: 'org.openoffice', name: 'juh', version: '4.1.2'
     implementation group: 'org.apache.xmlgraphics', name: 'fop', version: '2.3'
-    implementation group: 'org.quelea', name: 'planning-center', version: '0.3-SNAPSHOT', changing: true
+    // implementation group: 'org.quelea', name: 'planning-center', version: '0.3-SNAPSHOT', changing: true
 
     implementation group: 'org.openoffice', name: 'unoil', version: '4.1.2'
     implementation group: 'org.openoffice', name: 'bootstrap-connector', version: '0.1.1'

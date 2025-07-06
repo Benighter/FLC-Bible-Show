@@ -45,7 +45,7 @@ import org.quelea.services.importexport.SurvivorImportDialog;
 import org.quelea.services.importexport.VideoPsalmImportDialog;
 import org.quelea.services.importexport.ZWTurboDBChecker;
 import org.quelea.services.importexport.ZionWorxImportDialog;
-import org.quelea.services.importexport.PlanningCenterOnlineImportDialog;
+// import org.quelea.services.importexport.PlanningCenterOnlineImportDialog;
 import org.quelea.services.importexport.ElevantoImportDialog;
 import org.quelea.services.importexport.ProPresenterImportDialog;
 import org.quelea.services.importexport.ScreenMonkeyImportDialog;
@@ -83,7 +83,7 @@ public class ImportMenu extends Menu {
     private final ImportDialog presentationManagerImportDialog;
     private final ImportDialog screenMonkeyImportDialog;
     private final ImportDialog sofImportDialog;
-    private final PlanningCenterOnlineImportDialog planningCenterOnlineImportDialog;
+    // private final PlanningCenterOnlineImportDialog planningCenterOnlineImportDialog;
     private final ElevantoImportDialog elevantoImportDialog;
     private final MenuItem qspItem;
     private final MenuItem osItem;
@@ -108,7 +108,7 @@ public class ImportMenu extends Menu {
     private final MenuItem songproItem;
     private final MenuItem vsItem;
     private final MenuItem epicWorshipItem;
-    private final MenuItem pcoItem;
+    // private final MenuItem pcoItem;
     private final MenuItem elevantoItem;
 
     /**
@@ -140,7 +140,7 @@ public class ImportMenu extends Menu {
         presentationManagerImportDialog = new PresentationManagerImportDialog();
         screenMonkeyImportDialog = new ScreenMonkeyImportDialog();
         sofImportDialog = new SoFImportDialog();
-        planningCenterOnlineImportDialog = new PlanningCenterOnlineImportDialog();
+        // planningCenterOnlineImportDialog = new PlanningCenterOnlineImportDialog();
         elevantoImportDialog = new ElevantoImportDialog();
 
         qspItem = new MenuItem(LabelGrabber.INSTANCE.getLabel("qsp.button"), new ImageView(new Image("file:icons/logo16.png", 16, 16, false, true)));
@@ -159,10 +159,10 @@ public class ImportMenu extends Menu {
         });
         
         // planning center online
-        pcoItem = new MenuItem(LabelGrabber.INSTANCE.getLabel("pco.button"), new ImageView(new Image("file:icons/planningcenteronline.png", 16, 16, false, true)));
-        pcoItem.setOnAction((ActionEvent t) -> {
-            planningCenterOnlineImportDialog.start();
-        });
+        // pcoItem = new MenuItem(LabelGrabber.INSTANCE.getLabel("pco.button"), new ImageView(new Image("file:icons/planningcenteronline.png", 16, 16, false, true)));
+        // pcoItem.setOnAction((ActionEvent t) -> {
+        //     planningCenterOnlineImportDialog.start();
+        // });
 //        pcoItem.setAccelerator(new KeyCodeCombination(KeyCode.P, KeyCombination.SHORTCUT_DOWN, KeyCombination.ALT_DOWN));
         
         // elevanto
@@ -285,7 +285,7 @@ public class ImportMenu extends Menu {
         getItems().add(olpItem);
         getItems().add(olItem);
         getItems().add(osItem);
-        getItems().add(pcoItem);
+        // getItems().add(pcoItem);
         getItems().add(plainTextItem);
         getItems().add(pmItem);
         getItems().add(proPresenterItem);

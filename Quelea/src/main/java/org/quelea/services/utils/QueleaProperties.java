@@ -2632,6 +2632,10 @@ public final class QueleaProperties extends SortedProperties {
         return getProperty("bible.focus.keys", "Ctrl,B").split(",");
     }
 
+    public String[] getQuickBibleSearchKeys() {
+        return getProperty("quick.bible.search.keys", "Ctrl,Shift,B").split(",");
+    }
+
     /**
      * Set whether fade should be used.
      *

@@ -58,6 +58,7 @@ public class BiblePassage implements TextDisplayable, Serializable {
     private ThemeDTO theme;
     private final boolean multi;
     private Map<Dimension,Double> fontSizeCache;
+    private int highlightedVerseNum = -1; // Verse number to highlight, -1 for no highlighting
 
     /**
      * Create a new bible passage.
@@ -73,6 +74,21 @@ public class BiblePassage implements TextDisplayable, Serializable {
     }
 
     /**
+     * Create a new bible passage with highlighting.
+     * <p>
+     * @param biblename the bible that the passage comes from.
+     * @param location the location of the passage in the bible.
+     * @param verses the verses, in order, that make up the passage.
+     * @param multi whether this is a multi-chapter passage.
+     * @param highlightedVerseNum the verse number to highlight, or -1 for no highlighting.
+     */
+    public BiblePassage(String biblename, String location, BibleVerse[] verses, boolean multi, int highlightedVerseNum) {
+        this(location + "\n" + biblename, verses, new ThemeDTO(ThemeDTO.DEFAULT_FONT,
+                ThemeDTO.DEFAULT_FONT_COLOR, ThemeDTO.DEFAULT_FONT, ThemeDTO.DEFAULT_TRANSLATE_FONT_COLOR,
+                ThemeDTO.DEFAULT_BACKGROUND, ThemeDTO.DEFAULT_SHADOW, false, false, false, true, 3, -1), multi, highlightedVerseNum);
+    }
+
+    /**
      * Create a new bible passage from a summary and an array of verses.
      * <p>
      * @param summary the summary to display in the schedule.
@@ -80,9 +96,23 @@ public class BiblePassage implements TextDisplayable, Serializable {
      * @param theme the theme of the passage.
      */
     public BiblePassage(String summary, BibleVerse[] verses, ThemeDTO theme, boolean multi) {
+        this(summary, verses, theme, multi, -1);
+    }
+
+    /**
+     * Create a new bible passage from a summary and an array of verses with highlighting.
+     * <p>
+     * @param summary the summary to display in the schedule.
+     * @param verses the verses in the passage.
+     * @param theme the theme of the passage.
+     * @param multi whether this is a multi-chapter passage.
+     * @param highlightedVerseNum the verse number to highlight, or -1 for no highlighting.
+     */
+    public BiblePassage(String summary, BibleVerse[] verses, ThemeDTO theme, boolean multi, int highlightedVerseNum) {
         fontSizeCache = new HashMap<>();
         this.summary = summary;
         this.multi = multi;
+        this.highlightedVerseNum = highlightedVerseNum;
         this.smallText = summary.split("\n");
         for (int i = 0; i < smallText.length; i++) {
             smallText[i] = Utils.removeTags(smallText[i]);
@@ -124,6 +154,13 @@ public class BiblePassage implements TextDisplayable, Serializable {
             if (verse == null) {
                 verseError = true;
             } else {
+                // Check if this verse should be highlighted
+                boolean shouldHighlight = shouldHighlightVerse(verse);
+
+                if (shouldHighlight) {
+                    line.append("<highlight>");
+                }
+
                 if (QueleaProperties.get().getShowVerseNumbers()) {
                     line.append("<sup>");
                     if (multi) {
@@ -142,6 +179,11 @@ public class BiblePassage implements TextDisplayable, Serializable {
                     }
                     line.append(verseWord).append(" ");
                 }
+
+                if (shouldHighlight) {
+                    line.append("</highlight>");
+                }
+
                 count++;
                 if (USE_CHARS) {
                     if (!SPLIT_VERSES) {
@@ -402,5 +444,14 @@ public class BiblePassage implements TextDisplayable, Serializable {
 
     public String getLocation() {
         return summary.split("\n")[0];
+    }
+
+    /**
+     * Check if a verse should be highlighted based on the highlighted verse number.
+     * @param verse the verse to check
+     * @return true if the verse should be highlighted, false otherwise
+     */
+    private boolean shouldHighlightVerse(BibleVerse verse) {
+        return highlightedVerseNum != -1 && verse.getNum() == highlightedVerseNum;
     }
 }

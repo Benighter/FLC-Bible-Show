@@ -128,6 +128,22 @@ public class ScheduleList extends StackPane {
                         }
                     }
                 };
+
+                // Add click handlers for Bible passages
+                listCell.setOnMouseClicked(event -> {
+                    if (listCell.getItem() instanceof BiblePassage) {
+                        BiblePassage passage = (BiblePassage) listCell.getItem();
+                        if (event.getClickCount() == 1) {
+                            // Single click: Show passage in Bible panel (don't go live)
+                            showPassageInBiblePanel(passage);
+                        } else if (event.getClickCount() == 2) {
+                            // Double click: Show in Bible panel AND go live
+                            showPassageInBiblePanel(passage);
+                            QueleaApp.get().getMainWindow().getMainPanel().getLivePanel().setDisplayable(passage, 0);
+                        }
+                    }
+                });
+
                 cells.add(listCell);
                 listCell.setOnDragDetected(event -> {
                     if (listCell.getItem() != null) {
@@ -566,5 +582,80 @@ public class ScheduleList extends StackPane {
             listView.selectionModelProperty().get().select(selectedIndex + 1);
         }
         requestFocus();
+    }
+
+    /**
+     * Show a Bible passage in the Bible panel for navigation
+     * @param passage the Bible passage to show
+     */
+    private void showPassageInBiblePanel(BiblePassage passage) {
+        Platform.runLater(() -> {
+            try {
+                // Get the Bible panel
+                var biblePanel = QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getBiblePanel();
+
+                // Parse the passage preview text to extract book, chapter, and verse info
+                String passageText = passage.getPreviewText();
+
+                // Extract Bible name (everything after the last newline, or the whole title if no newline)
+                String bibleName = passageText;
+                String reference = passageText;
+                if (passageText.contains("\n")) {
+                    String[] parts = passageText.split("\n");
+                    reference = parts[0];
+                    bibleName = parts[parts.length - 1];
+                }
+
+                // Parse the reference (e.g., "Genesis 1:1-3" or "John 3:16")
+                if (reference.contains(" ")) {
+                    String[] refParts = reference.split(" ", 2);
+                    String bookName = refParts[0];
+                    String chapterVerse = refParts[1];
+
+                    // Set the Bible version first
+                    var bibleSelector = biblePanel.getBibleSelector();
+                    for (int i = 0; i < bibleSelector.getItems().size(); i++) {
+                        if (bibleSelector.getItems().get(i).getBibleName().equals(bibleName)) {
+                            bibleSelector.getSelectionModel().select(i);
+                            break;
+                        }
+                    }
+
+                    // Wait a moment for the Bible selection to update the books
+                    Platform.runLater(() -> {
+                        try {
+                            // Set the book
+                            var bookSelector = biblePanel.getBookSelector();
+                            for (int i = 0; i < bookSelector.getItems().size(); i++) {
+                                if (bookSelector.getItems().get(i).getBookName().equals(bookName)) {
+                                    bookSelector.getSelectionModel().select(i);
+                                    break;
+                                }
+                            }
+
+                            // Wait another moment for the book selection to update
+                            Platform.runLater(() -> {
+                                try {
+                                    // Set the passage text - this should trigger the update automatically
+                                    var passageSelector = biblePanel.getPassageSelector();
+                                    passageSelector.setText(chapterVerse);
+
+                                    // Switch to the Bible tab
+                                    QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getTabPane().getSelectionModel().select(1); // Bible tab is index 1
+                                } catch (Exception e) {
+                                    System.err.println("Error setting passage text: " + e.getMessage());
+                                }
+                            });
+                        } catch (Exception e) {
+                            System.err.println("Error setting book: " + e.getMessage());
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                // If there's an error, just ignore it
+                System.err.println("Error showing passage in Bible panel: " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
     }
 }

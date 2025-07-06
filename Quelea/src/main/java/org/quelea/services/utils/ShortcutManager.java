@@ -83,6 +83,8 @@ public class ShortcutManager {
             } else if (checkCombination(QueleaProperties.get().getBibleFocusKeys())) {
                 mainPanel.getLibraryPanel().getTabPane().getSelectionModel().select(1);
                 mainPanel.getLibraryPanel().getBiblePanel().getBookSelector().requestFocus();
+            } else if (checkCombination(QueleaProperties.get().getQuickBibleSearchKeys())) {
+                mainWindow.getMainToolbar().getQuickBibleSearchField().requestFocus();
             } else if (checkCombination(QueleaProperties.get().getAddAndGoLiveKeys())) {
                 if (mainPanel.getLibraryPanel().getTabPane().getSelectionModel().isSelected(0) && mainPanel.getLibraryPanel().getLibrarySongPanel().getSongList().getSelectedValues().size() == 1) {
                     SongDisplayable displayable = mainPanel.getLibraryPanel().getLibrarySongPanel().getSongList().getSelectedValues().get(0);
