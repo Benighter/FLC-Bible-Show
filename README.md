@@ -1,6 +1,6 @@
 # FLC Bible Show
 
-**A customized fork of Quelea for Faith Life Church, enhanced with improved Bible verse interaction and presentation features.**
+**A customized fork of Quelea for First Love Church, enhanced with improved Bible verse interaction and presentation features.**
 
 ## 📥 **Download Latest Version**
 
@@ -16,7 +16,7 @@
 
 ---
 
-This is a specialized version of the popular Quelea church presentation software, forked and enhanced by **Bennet Nkolele** for Faith Life Church. The application maintains all the core functionality of Quelea while adding specific improvements for Bible verse presentation and interaction.
+This is a specialized version of the popular Quelea church presentation software, forked and enhanced by **Bennet Nkolele** for First Love Church. The application maintains all the core functionality of Quelea while adding specific improvements for Bible verse presentation and interaction.
 
 ## 🚀 Key Enhancements
 
@@ -45,7 +45,7 @@ This is a specialized version of the popular Quelea church presentation software
 
 ## 📋 **Fork Information**
 
-This project is forked from the original [Quelea Projection Software](https://github.com/quelea-projection/Quelea) and customized specifically for Faith Life Church's presentation needs. All original Quelea functionality is preserved while adding targeted improvements for Bible verse interaction.
+This project is forked from the original [Quelea Projection Software](https://github.com/quelea-projection/Quelea) and customized specifically for First Love Church's presentation needs. All original Quelea functionality is preserved while adding targeted improvements for Bible verse interaction.
 
 **Original Quelea Project:** [https://github.com/quelea-projection/Quelea](https://github.com/quelea-projection/Quelea)
 
@@ -121,7 +121,7 @@ This project maintains the same license as the original Quelea project. See the 
 ## 🙏 **Acknowledgments**
 
 - **Original Quelea Team**: For creating the excellent foundation that this fork builds upon
-- **Faith Life Church**: For providing the use case and requirements that drove these enhancements
+- **First Love Church**: For providing the use case and requirements that drove these enhancements
 - **Open Source Community**: For the tools and libraries that make this project possible
 
 ---
