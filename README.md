@@ -7,9 +7,11 @@
 ### FLC Bible Show (Enhanced Version) ✨
 **Ready to download!** - Enhanced builds with Bible verse clicking fixes:
 
-[**📦 FLC Bible Show - ZIP (Windows/Mac/Linux)**](https://github.com/Benighter/FLC-Bible-Show/raw/main/Quelea/Quelea/build/distributions/Quelea.zip)
+[**📦 FLC Bible Show - ZIP (Windows/Mac/Linux)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.zip)
 
-[**📦 FLC Bible Show - TAR (Linux/Unix)**](https://github.com/Benighter/FLC-Bible-Show/raw/main/Quelea/Quelea/build/distributions/Quelea.tar)
+[**📦 FLC Bible Show - TAR (Linux/Unix)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.tar)
+
+[**📋 All Releases**](https://github.com/Benighter/FLC-Bible-Show/releases)
 
 **🎯 What's Enhanced:**
 - ✅ Fixed Bible verse clicking (no more unresponsive verses!)
