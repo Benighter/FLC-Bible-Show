@@ -72,7 +72,7 @@ public class MainWindow extends Stage {
      *                             application-wide main window, false otherwise.
      */
     public MainWindow(boolean setApplicationWindow, boolean hasVLC) {
-        setTitle("Quelea " + QueleaProperties.VERSION.getVersionString());
+        setTitle("FLC Bible Show " + QueleaProperties.VERSION.getVersionString());
         Utils.addIconsToStage(this);
         BorderPane mainPane = new BorderPane();
         VBox.setVgrow(mainPane, Priority.SOMETIMES);

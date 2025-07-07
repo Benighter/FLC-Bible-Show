@@ -42,11 +42,11 @@ javafx {
 ext {
     versionsuffix = System.properties["versionsuffix"]!=null ? System.properties["versionsuffix"] : project.queleaversion
 
-    CPInstallerName="quelea-" + versionsuffix + "-crossplatform-install.jar"
-    WindowsInstallerName="quelea-" + versionsuffix + "-x86-windows-install.exe"
-    WindowsInstaller64Name="quelea-" + versionsuffix + "-x64-windows-install.exe"
-    MacInstallerName="quelea-" + versionsuffix + "-mac.zip"
-    JavaAppName="quelea-" + versionsuffix + "-java-app.tar.gz"
+    CPInstallerName="flc-bible-show-" + versionsuffix + "-crossplatform-install.jar"
+    WindowsInstallerName="flc-bible-show-" + versionsuffix + "-x86-windows-install.exe"
+    WindowsInstaller64Name="flc-bible-show-" + versionsuffix + "-x64-windows-install.exe"
+    MacInstallerName="flc-bible-show-" + versionsuffix + "-mac.zip"
+    JavaAppName="flc-bible-show-" + versionsuffix + "-java-app.tar.gz"
 
     CPInstaller ="dist/standalone/" + CPInstallerName
     WindowsInstaller="dist/standalone/" + ext.WindowsInstallerName
@@ -82,13 +82,13 @@ application {
 
 task createQueleaExe64(type: edu.sc.seis.launch4j.tasks.Launch4jLibraryTask) { //Launch4j
     mainClassName = 'org.quelea.windows.main.MainStub'
-    mutexName = "queleamutex"
+    mutexName = "flcbibleshowmutex"
     supportUrl = "https://quelea.discourse.group/"
     icon = "../../icons/logo.ico"
     copyright = "GPLv3"
     bundledJrePath = "winjre64"
     jvmOptions = ["-Dfile.encoding=UTF-8","-Dprism.dirtyopts=false","--add-opens java.base/java.nio=ALL-UNNAMED","-Dglass.accessible.force=false","--add-exports=javafx.graphics/com.sun.javafx.css=ALL-UNNAMED","--add-exports=javafx.base/com.sun.javafx.runtime=ALL-UNNAMED","--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED","--add-opens java.base/java.lang=ALL-UNNAMED","--add-opens javafx.controls/javafx.scene.control=ALL-UNNAMED"]
-    outfile = "Quelea64.exe"
+    outfile = "FLCBibleShow64.exe"
 }
 
 task downloadGStreamer {
@@ -153,9 +153,9 @@ task copyToDist {
         copy {from "src" into project.distdir + "/src"}
         copy {from zipTree("bundlejre/winjre64.zip") into project.distdir}
         file("dist/zulu21.40.17-ca-fx-jre21.0.6-win_x64").renameTo(file("dist/winjre64"))
-        copy {from file("build/libs/Quelea.jar") into file(project.distdir)}
+        copy {from file("build/libs/FLCBibleShow.jar") into file(project.distdir)}
         copy {from file("README.TXT") into file(project.distdir)}
-        copy {from file("quelea.properties") into file(project.distdir)}
+        copy {from file("flcbibleshow.properties") into file(project.distdir)}
         copy {from file("scheduleformat.xsl") into file(project.distdir)}
         copy {from file("songformat.xsl") into file(project.distdir)}
         copy {from file("fopcfg.xml") into file(project.distdir)}
@@ -301,6 +301,7 @@ dependencies {
 }
 
 jar {
+    archiveBaseName = 'FLCBibleShow'
     manifest {
         attributes (
                 'Main-Class': 'org.quelea.windows.main.MainStub',
@@ -315,7 +316,7 @@ task tar(type: Tar) {
     compression = Compression.GZIP
 
     from 'dist/'
-    into "Quelea-${versionsuffix}-java-app"
+    into "FLCBibleShow-${versionsuffix}-java-app"
     include "lib/",
             "bibles/",
             "dictionaries/",
@@ -327,10 +328,10 @@ task tar(type: Tar) {
             "themes/",
             "vid/",
             "fopcfg.xml",
-            "quelea.properties",
+            "flcbibleshow.properties",
             "scheduleformat.xsl",
             "songformat.xsl",
-            "Quelea.jar"
+            "FLCBibleShow.jar"
 }
 
 task releaseSummary(type:JavaExec) {

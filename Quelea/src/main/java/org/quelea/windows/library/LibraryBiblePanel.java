@@ -74,6 +74,7 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
     private ObservableList<BibleBook> master;
     private WebEngine webEngine;
     private ChapterVerseParser cvp;
+    private boolean bridgeInitialized = false;
 
     // Static fields to track the currently highlighted verse for live display
     private static volatile int currentHighlightedVerse = -1;
@@ -311,13 +312,16 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
         multi = (sections.length > 1);
         previewText.append(QueleaProperties.get().getUseDarkTheme() ? getBibleViewHead().replace("#000", "#FFF").replace("white", "black") : getBibleViewHead());
 
-        // Setup JavaScript/Java bridge
-        webEngine.getLoadWorker().stateProperty().addListener((ObservableValue<? extends State> ov, State oldState, State newState) -> {
-            if (newState == State.SUCCEEDED) {
-                JSObject window = (JSObject) webEngine.executeScript("window");
-                window.setMember("java", new JavaScriptBridge());
-            }
-        });
+        // Setup JavaScript/Java bridge - ensure it's set up after content loads
+        if (!bridgeInitialized) {
+            webEngine.getLoadWorker().stateProperty().addListener((ObservableValue<? extends State> ov, State oldState, State newState) -> {
+                if (newState == State.SUCCEEDED) {
+                    // Always re-initialize the bridge when content loads
+                    initializeJavaScriptBridge();
+                }
+            });
+            bridgeInitialized = true;
+        }
 
         for (String s : sections) {
             cvp = new ChapterVerseParser(s);
@@ -409,6 +413,7 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
         previewText.append("    </body>\n"
                 + "</html>");
 
+        // Load content - the JavaScript bridge will be set up automatically via the listener
         webEngine.loadContent(previewText.toString());
     }
 
@@ -482,21 +487,41 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
     }
 
     /**
+     * Initialize the JavaScript bridge for verse clicking
+     */
+    private void initializeJavaScriptBridge() {
+        try {
+            JSObject window = (JSObject) webEngine.executeScript("window");
+            window.setMember("java", new JavaScriptBridge());
+            // Verify the bridge is working
+            webEngine.executeScript("console.log('JavaScriptBridge initialized successfully');");
+            System.out.println("JavaScriptBridge initialized successfully");
+        } catch (Exception e) {
+            System.err.println("Failed to initialize JavaScriptBridge: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Class to receive the clicked verses in the WebView
      */
     public class JavaScriptBridge {
 
         public void send(String verse) {
-            String oldText = passageSelector.getText();
-            int verseNum = Integer.parseInt(verse);
-            String chapterNum;
-            if (!oldText.contains(":")) {
-                chapterNum = oldText;
-            } else {
-                chapterNum = oldText.substring(0, oldText.lastIndexOf(":"));
-            }
-            ChapterVerseParser cvp = QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getBiblePanel().getCVP();
-            if (cvp != null) {
+            try {
+                System.out.println("JavaScriptBridge.send() called with verse: " + verse);
+                String oldText = passageSelector.getText();
+                System.out.println("Current passage selector text: " + oldText);
+                int verseNum = Integer.parseInt(verse);
+                String chapterNum;
+                if (!oldText.contains(":")) {
+                    chapterNum = oldText;
+                } else {
+                    chapterNum = oldText.substring(0, oldText.lastIndexOf(":"));
+                }
+                System.out.println("Chapter number: " + chapterNum + ", Verse number: " + verseNum);
+                ChapterVerseParser cvp = QueleaApp.get().getMainWindow().getMainPanel().getLibraryPanel().getBiblePanel().getCVP();
+                if (cvp != null) {
                 final String chapter = chapterNum;
                 final int fromVerse = cvp.getFromVerse();
                 Platform.runLater(() -> {
@@ -534,8 +559,9 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                                         Platform.runLater(() -> {
                                             try {
                                                 webEngine.executeScript("highlightActiveVerse('" + verseNum + "');");
+                                                System.out.println("Successfully highlighted verse " + verseNum);
                                             } catch (Exception ex) {
-                                                // Ignore if highlighting fails
+                                                System.err.println("Failed to highlight verse " + verseNum + ": " + ex.getMessage());
                                             }
                                         });
 
@@ -546,18 +572,17 @@ public class LibraryBiblePanel extends VBox implements BibleChangeListener {
                             }
                         }
                     } catch (Exception e) {
-                        // If there's an error creating the passage, fall back to the original behavior
-                        StringBuilder sb = new StringBuilder();
-                        if (fromVerse == 0) {
-                            sb.append(chapter).append(":").append(verseNum);
-                        } else if (verseNum > cvp.getToVerse()) {
-                            sb.append(chapter).append(":").append(fromVerse).append("-").append(verseNum);
-                        } else {
-                            sb.append(chapter).append(":").append(verseNum).append("-").append(cvp.getToVerse());
-                        }
-                        passageSelector.setText(sb.toString());
+                        System.err.println("Error in JavaScriptBridge.send() Platform.runLater: " + e.getMessage());
+                        e.printStackTrace();
+                        // Don't update the passage selector as it would trigger a WebView reload and break the JavaScript bridge
                     }
                 });
+            } else {
+                System.err.println("CVP is null in JavaScriptBridge.send()");
+            }
+            } catch (Exception e) {
+                System.err.println("Error in JavaScriptBridge.send() outer catch: " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }

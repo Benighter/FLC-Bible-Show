@@ -31,11 +31,11 @@
         "dist/themes",
         "dist/vid",
         "dist/fopcfg.xml",
-        "dist/quelea.properties",
+        "dist/flcbibleshow.properties",
         "dist/scheduleformat.xsl",
         "dist/songformat.xsl"
     ],
     "icon": "dist/icons/mac-logo.icns",
-    "output": "out-mac/Quelea.app",
+    "output": "out-mac/FLCBibleShow.app",
     "verbose": true
 }

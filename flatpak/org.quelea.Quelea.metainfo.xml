@@ -7,15 +7,15 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0</project_license>
 
-  <name>Quelea</name>
-  <summary>Open source projection software for churches</summary>
+  <name>FLC Bible Show</name>
+  <summary>Open source Bible presentation software for churches</summary>
 
   <developer id="org.quelea">
     <name>Michael Berry</name>
   </developer>
 
   <description>
-    <p>Quelea is an open source projection application specifically tailored for churches.</p>
+    <p>FLC Bible Show is an open source Bible presentation application specifically tailored for churches.</p>
     
     <p>With one dashboard you have an overview for the entire church service and can control
     which songs, bible texts, images and more multimedia you want to project on the big screen.</p>
@@ -41,7 +41,7 @@
   <screenshots>
     <screenshot type="default">
       <image>https://raw.githubusercontent.com/quelea-projection/Quelea/e00d97b97ec8f8ddc3edd5f90bc7f24716601656/screenshot.png</image>
-      <caption>Main Quelea dashboard view</caption>
+      <caption>Main FLC Bible Show dashboard view</caption>
     </screenshot>
   </screenshots>
 
@@ -55,7 +55,7 @@
     <release version="2024.1" date="2024-05-11">
       <url type="details">https://github.com/quelea-projection/Quelea/blob/master/Quelea/changelogs/changelog-2024.1.txt</url>
       <description>
-        <p>Quelea (2024.1) stable</p>
+        <p>FLC Bible Show (2024.1) stable</p>
           <ul>
             <li>Various minor bugfixes</li>
             <li>Upgrade to Java21 and OpenJFX 21</li>
@@ -67,7 +67,7 @@
     <release version="2024.0" date="2024-01-06">
       <url type="details">https://github.com/quelea-projection/Quelea/blob/master/Quelea/changelogs/changelog-2024.0.txt</url>
       <description>
-        <p>Quelea (2024.0) stable</p>
+        <p>FLC Bible Show (2024.0) stable</p>
           <ul>
             <li>Migrate to GStreamer for video playback</li>
             <li>Videos can now be played in preview windows</li>
@@ -81,7 +81,7 @@
             <li>Logo display now supports video files</li>
             <li>Unsupported videos now have clear unsupported preview image</li>
             <li>Allow multiple selection in song database</li>
-            <li>Critical fix: Using the French language no longer crashes Quelea when opening the options dialog</li>
+            <li>Critical fix: Using the French language no longer crashes FLC Bible Show when opening the options dialog</li>
             <li>Various minor bugfixes</li>
           </ul>
       </description>

@@ -2,12 +2,12 @@
 
 <shortcuts>
     <skipIfNotSupported/>
-    <programGroup defaultName="Quelea"
+    <programGroup defaultName="FLC Bible Show"
                   location="applications"/>
     <shortcut
-            name="Quelea"
-            target="$INSTALL_PATH\Quelea.bat"
-            description="Launch Quelea"
+            name="FLC Bible Show"
+            target="$INSTALL_PATH\FLCBibleShow.bat"
+            description="Launch FLC Bible Show"
             workingDirectory="$INSTALL_PATH"
             iconFile="$INSTALL_PATH\icons\logo.ico"
             initialState="normal"

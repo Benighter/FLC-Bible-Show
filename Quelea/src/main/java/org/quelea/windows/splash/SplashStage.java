@@ -50,7 +50,7 @@ public class SplashStage extends Stage {
         initModality(Modality.APPLICATION_MODAL);
         initStyle(StageStyle.UNDECORATED);
         Utils.addIconsToStage(this);
-        setTitle("Quelea " + LabelGrabber.INSTANCE.getLabel("loading.text") + "...");
+        setTitle("FLC Bible Show " + LabelGrabber.INSTANCE.getLabel("loading.text") + "...");
         Image splashImage = new Image(new File(QueleaProperties.VERSION.getUnstableName().getSplashPath()).getAbsoluteFile().toURI().toString());
         ImageView imageView = new ImageView(splashImage);
         Text version = new Text(QueleaProperties.VERSION.getVersionString());
