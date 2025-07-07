@@ -19,6 +19,9 @@ Quelea/bundlejre/*
 Quelea/build/*
 Quelea/out-mac/*
 Quelea/dist/*
+build/*
+**/build/distributions/*.tar
+**/build/distributions/*.zip
 Quelea/nbproject/*
 Quelea/.idea/*
 Quelea/output/*
