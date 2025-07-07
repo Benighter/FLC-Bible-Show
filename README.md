@@ -7,9 +7,9 @@
 ### FLC Bible Show (Enhanced Version) ✨
 **Ready to download!** - Enhanced builds with Bible verse clicking fixes:
 
-[**📦 FLC Bible Show - ZIP (Windows/Mac/Linux)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.zip)
+[**🪟 Windows Executable (x64)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-windows-x64.exe) - *Requires Java 17+*
 
-[**📦 FLC Bible Show - TAR (Linux/Unix)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.tar)
+[**🌐 Cross-Platform Archive**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.tar.gz) - *Complete application for Windows/Mac/Linux*
 
 [**📋 All Releases**](https://github.com/Benighter/FLC-Bible-Show/releases)
 
