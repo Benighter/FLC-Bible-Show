@@ -4,15 +4,24 @@
 
 ## 📥 **Download Latest Version**
 
-**Ready to use FLC Bible Show? Download the latest version here:**
+### FLC Bible Show (Enhanced Version) ✨
+**Ready to download!** - Enhanced builds with Bible verse clicking fixes:
 
-[**Latest Release - Windows x64**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-windows-x64.exe)
+[**📦 FLC Bible Show - ZIP (Windows/Mac/Linux)**](https://github.com/Benighter/FLC-Bible-Show/raw/main/Quelea/Quelea/build/distributions/Quelea.zip)
 
-[**Latest Release - Cross Platform (requires Java)**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-crossplatform.jar)
+[**📦 FLC Bible Show - TAR (Linux/Unix)**](https://github.com/Benighter/FLC-Bible-Show/raw/main/Quelea/Quelea/build/distributions/Quelea.tar)
 
-[**Latest Release - Mac**](https://github.com/Benighter/FLC-Bible-Show/releases/latest/download/flc-bible-show-mac.zip)
+**🎯 What's Enhanced:**
+- ✅ Fixed Bible verse clicking (no more unresponsive verses!)
+- ✅ Improved JavaScript bridge stability
+- ✅ Enhanced verse navigation and highlighting
 
-[**All Releases**](https://github.com/Benighter/FLC-Bible-Show/releases)
+### Original Quelea (Reference)
+For comparison, the original Quelea downloads:
+
+[**2024.0 - Windows x64**](https://github.com/quelea-projection/Quelea/releases/download/v2024.0/quelea-2024.0-x64-windows-install.exe)
+
+[**2024.0 - Cross platform (requires Java)**](https://github.com/quelea-projection/Quelea/releases/download/v2024.0/quelea-2024.0-crossplatform-install.jar)
 
 ---
 
